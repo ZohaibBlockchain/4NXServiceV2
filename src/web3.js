@@ -3,6 +3,8 @@ import { ethers } from "ethers";
 const fContractInfo = require("./contractABI/factory.json");
 const tContractInfo = require("./contractABI/token.json");
 const smartContractInf = require("./contractABI/contractInf.json");
+const InfType = require('./Types/type.js');
+
 require('dotenv').config();
 
 const account_from = {
@@ -198,5 +200,38 @@ export async function getInstrumentAddress(symbol) {
     smartContractInf.Factory.ABI,
     wallet
   );
-  return await contract.getAddress(symbol);
+  //Create new instrument token and then return address
+  tokenAddress =  await contract.getAddress(symbol);
+  if (ethers.constants.AddressZero == tokenAddress) {
+    let nSymbol = symbol;
+    if (nSymbol.length > 12) {
+      nSymbol = nSymbol.slice(0, 12); // take the first 12 characters
+    };
+    let tx = await contract.deployNewERC20Token(symbol, nSymbol, '18');
+    let receipt = await tx.wait();
+    return receipt.logs[0].address;
+  }
+  else {
+    return address;
+  }
+}
+
+export async function SignTrade(inf) {
+  try {
+    let _token = await getInstrumentAddress(inf.symbol);
+    let _blockRange = await (provider.getBlockNumber() + 5);//Trade will be valid for the next 5 block
+    const _chainID = 1337;
+    const _tradeID = Math.floor(Math.random() * (9999999 - 1111111 + 1) + min);
+    const _inf = { name: '4NX', version: 1, chainId: _chainID, verifyingContract: smartContractInf.EIP712.Address, tradeID: _tradeID, price: inf.price, amount: inf.amount, blockRange: _blockRange, user: inf.user, token: _token };
+    const signer = new ethers.Wallet(account_from.privateKey);
+    const signature = await signer._signTypedData(InfType.domain(_inf), InfType.types, InfType.val(_inf));
+    const { r, s, v } = ethers.utils.splitSignature(signature);
+    console.log(`r: ${r}`);
+    console.log(`s: ${s}`);
+    console.log(`v: ${v}`);
+    return { status: 'success', r: r, s: s, v: v, tradeID: _tradeID, price: inf.price, amount: inf.amount, blockRange: _blockRange, token: _token, type: _inf.type };
+  }
+  catch (err) {
+    return { status: 'Failed', reason: err };
+  }
 }

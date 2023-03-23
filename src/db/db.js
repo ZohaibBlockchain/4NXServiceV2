@@ -154,8 +154,3 @@ function getInstrumentValue(user, symbol) {
 
 
 
-
-export async function test(){
-  return await getInstrumentAddress('TestBTC');
-  }
-  

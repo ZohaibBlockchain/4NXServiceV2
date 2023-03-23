@@ -1,8 +1,8 @@
 //Beta version 1.1 of W3API...
-
+import {SignTrade} from "./web3";
 import express from "express";
 const bodyParser = require("body-parser");
-import { ExeTrade ,test} from "./db/db";
+import {ExeTrade} from "./db/db";
 const mongoose = require("mongoose");
 import { router } from "./routes/routes";
 const https = require('https');
@@ -13,11 +13,6 @@ require("dotenv").config();
 let counter = 0;
 let Approvedclients = [];
 
-//------
-test();
-
-
-//-------
 
 
 
@@ -41,7 +36,6 @@ function WSSserver() {
     Errorlogger(error.message);
   }
 }
-
 
 const ip = require("ip");
 const ipAddress = ip.address();
@@ -87,7 +81,7 @@ process.on('TypeError', function (err) {
 
 
 //-----------fuctions--------
-const updateSpeed = 10000;
+const updateSpeed = 1000;
 async function w3Engine() {
   let c = await ExeTrade();
   console.log(c);
@@ -101,7 +95,7 @@ async function w3Engine() {
 
 
 
-function msgHandler(msg, ws) {
+async function msgHandler(msg, ws) {
 
   if (checkClient(ws)) {
     switch (msg.MessageType) {
@@ -109,16 +103,13 @@ function msgHandler(msg, ws) {
         console.log('I got the report');
         break;
       }
-      case 'ExecutionReport': {
-        console.log('I got the report');
-        break;
-      }
       case 'TokenInf': {
         console.log('Needs to send token Information');
         break;
       }
-      case 'Order': {
-        console.log('I got the order');
+      case 'signOrder': {
+       let res = await SignTrade(msg.inf);
+       ws.send({MessageType:'signOrder',requestId:inf.requestId,inf:res});
         break;
       }
       default:

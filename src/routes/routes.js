@@ -14,6 +14,7 @@ import { getNames, checkType, detectInstrument,checkLeverageInstruments} from ".
 
 import {
   getInstrument,
+  getInstrumentAddress
 } from "../web3";
 const bodyParser = require("body-parser");
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -163,7 +164,6 @@ router.get("*", function (req, res) {
 router.post("*", function (req, res) {
   res.send("Invalid request", 404);
 });
-
 
 
 

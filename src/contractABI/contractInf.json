@@ -1,4 +1,7 @@
 {
+    "EIP712": {
+        "Address": "0xc991b93bC6606677Ab45814401B7438D8eDa3186"
+    },
     "Factory": {
         "Address": "0xc991b93bC6606677Ab45814401B7438D8eDa3186",
         "ABI": [
